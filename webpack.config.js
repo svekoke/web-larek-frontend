@@ -86,6 +86,8 @@ const config = {
   }
 };
 
+console.log("✅ API_ORIGIN в webpack.config.js:", process.env.API_ORIGIN);
+
 module.exports = () => {
   if (isProduction) {
     config.mode = "production";
