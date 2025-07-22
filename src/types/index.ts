@@ -1,44 +1,32 @@
-//	товар в каталоге
-export interface ProductItem {
+// Тип товара
+export type Product = {
   id: string;
   title: string;
   description: string;
   image: string;
   category: string;
-  price: number | null;
-}
+  price: number;
+};
 
+// Тип ответа от API со списком
+export type ApiListResponse<T> = {
+  total: number;
+  items: T[];
+};
 
-//	корзина
-export interface CartState {
-	ids: string[];
-	sum: number;
-}
+// Тип формы заказа (1-й шаг)
+export type OrderForm = {
+  payment: string;   // "card" или "cash"
+  address: string;
+};
 
-//	способ оплаты
-export type PaymentOptional = 'online' | 'inPerson' ;
+// Тип формы контактов (2-й шаг)
+export type ContactForm = {
+  email: string;
+  phone: string;
+};
 
-//	заказ
-export interface OrderData {
-	contact: {
-		email: string;
-		phone: string;
-	};
-	address: string;
-	paymentType: PaymentOptional;
-	productIds: string[];
-}
-
-//	финал заказ оформлен
-export interface OrderFinalized {
-	orderId: string;
-	totalSum: number;
-	status?: 'success' | 'error';
-}
-
-//	апи при получении списка
-export interface ApiListResponse<Type> {
-	total: number;
-	items: Type[];
-}
-
+// Полный заказ (то, что отправляется на сервер)
+export type OrderRequest = {
+  items: string[]; // массив id товаров
+} & OrderForm & ContactForm;

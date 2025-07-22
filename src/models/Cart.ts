@@ -1,38 +1,28 @@
-import { CartState, ProductItem } from '../types';
-import { IEvents } from '../components/base/events';
+import { Product } from '../types/index';
 
-//	хранит данные и логику корзины
 export class Cart {
-	private cart: CartState = { ids: [], sum: 0 };
+	private items: Product[] = [];
 
-	constructor(private events: IEvents) {}
-
-	add(product: ProductItem) {
-		this.cart.ids.push(product.id);
-		this.cart.sum += product.price || 0;
-		this.triggerUpdate();
+	add(product: Product) {
+		this.items.push(product);
 	}
 
-	remove(product: ProductItem) {
-		this.cart.ids = this.cart.ids.filter(id => id !== product.id);
-		this.cart.sum -= product.price || 0;
-		this.triggerUpdate();
+	remove(index: number) {
+		this.items.splice(index, 1);
+	}
+
+	getItems(): Product[] {
+		return this.items;
+	}
+
+	getTotal(): number {
+		return this.items.reduce((sum, item) => sum + item.price, 0);
 	}
 
 	clear() {
-		this.cart = { ids: [], sum: 0 };
-		this.triggerUpdate();
+		this.items = [];
 	}
-
-	contains(productId: string) {
-		return this.cart.ids.includes(productId);
-	}
-
-	getState() {
-		return this.cart;
-	}
-
-	private triggerUpdate() {
-		this.events.emit('cart:update', this.cart);
+	getTotalCount(): number {
+		return this.items.length;
 	}
 }

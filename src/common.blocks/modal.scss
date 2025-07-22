@@ -3,8 +3,9 @@
 
 .modal {
   @include mixins.sublayer;
-  // height: max-content;
-  position: absolute;
+  inset: 0;
+height: 100vh;
+  position: fixed;
   display: none;
   justify-content: center;
   background-color: $overlayBackground;

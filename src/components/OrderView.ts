@@ -1,43 +1,63 @@
-//  импорт типа заказа и событий
-import { OrderData } from '../types/index';
-import { IEvents } from './base/events';
+import { OrderForm } from '../types/index';
 
-//  класс формы
 export class OrderView {
-	protected element: HTMLFormElement;
+  private element: HTMLElement;
 
-	constructor(private events: IEvents) {
+  constructor(
+    private onSubmit: (data: OrderForm) => void
+  ) {
+    const template = document.getElementById('order') as HTMLTemplateElement;
+    this.element = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
 
-        //  шаблон из HTML находится
-		const template = document.querySelector<HTMLTemplateElement>('#order');
-		if (!template) throw new Error('Шаблон формы заказа не найден');
+    const form = this.element as HTMLFormElement;
+    const submitBtn = form.querySelector('.order__button') as HTMLButtonElement;
+    const addressInput = form.querySelector('input[name="address"]') as HTMLInputElement;
+    const paymentButtons = form.querySelectorAll('button[name]');
+    const errorContainer = form.querySelector('.form__errors') as HTMLSpanElement;
 
-        //  клонирование шаблона форм
-		this.element = template.content.firstElementChild!.cloneNode(true) as HTMLFormElement;
+    let selectedPayment: string = '';
 
-		// отработчик клика 
-		this.element.querySelectorAll('button[name]').forEach((btn) => {
-			btn.addEventListener('click', () => {
-				const type = btn.getAttribute('name')!;
-				this.events.emit('order.payment', {value:type});
-			});
-		});
+    const validate = () => {
+      const address = addressInput.value.trim();
+      const isValid = selectedPayment && address.length > 0;
 
-		// ввод адреса сохраняется значение из поля ввода
-		this.element.address?.addEventListener('input', (e: Event) => {
-			const target = e.target as HTMLInputElement;
-			this.events.emit('order.address', { value: target.value });
-		});
+      if (!address) {
+        errorContainer.textContent = 'Необходимо указать адрес';
+      } else {
+        errorContainer.textContent = '';
+      }
 
-		//  отправка формы на "далее", отмена стандартной формы и отправляется событие
-		this.element.addEventListener('submit', (e) => {
-			e.preventDefault();
-			this.events.emit('order.submit');
-		});
-	}
+      submitBtn.disabled = !isValid;
+    };
 
-    //  возвращает структуру чтоб вставить ее на страницу
-	render(): HTMLElement {
-		return this.element;
-	}
+    form.addEventListener('input', validate);
+
+    paymentButtons.forEach((btn) => {
+      const button = btn as HTMLButtonElement;
+      button.addEventListener('click', () => {
+        selectedPayment = button.name;
+        paymentButtons.forEach((b) => (b as HTMLElement).classList.remove('button_alt-active'));
+        button.classList.add('button_alt-active');
+        validate();
+      });
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const address = addressInput.value.trim();
+      if (!address || !selectedPayment) {
+        validate();
+        return;
+      }
+
+      this.onSubmit({
+        address,
+        payment: selectedPayment,
+      });
+    });
+  }
+
+  getElement() {
+    return this.element;
+  }
 }

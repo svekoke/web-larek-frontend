@@ -1,61 +1,34 @@
-import { OrderData, OrderFinalized, PaymentOptional } from '../types';
-import { IEvents } from '../components/base/events';
+import { OrderForm, ContactForm, Product } from '../types/index';
 
-//	хранит данные и логику заказа
 export class Order {
-	private order: OrderData = {
-		contact: { email: '', phone: '' },
-		address: '',
-		paymentType: 'online',
-		productIds: [],
-	};
+  private items: Product[] = [];
+  private form: Partial<OrderForm> = {};
+  private contacts: Partial<ContactForm> = {};
 
-	private errors: Partial<
-		Record<keyof OrderData | 'contact.email' | 'contact.phone', string>
-	> = {};
+  setItems(items: Product[]) {
+    this.items = items;
+  }
 
-	constructor(private events: IEvents) {}
+  setForm(data: OrderForm) {
+    this.form = data;
+  }
 
-	setField(
-		field: keyof OrderData | 'contact.email' | 'contact.phone',
-		value: string
-	) {
-		if (field === 'contact.email') this.order.contact.email = value;
-		else if (field === 'contact.phone') this.order.contact.phone = value;
-		else this.order[field as keyof OrderData] = value as any;
+  setContacts(data: ContactForm) {
+    this.contacts = data;
+  }
 
-		this.events.emit('order:update', this.order);
-	}
+  getOrderData() {
+    return {
+      items: this.items.map((item) => item.id),
+      total: this.items.reduce((sum, item) => sum + item.price, 0), // сумма заказа
+      ...this.form,
+      ...this.contacts,
+    };
+  }
 
-	attachProducts(ids: string[], total: number) {
-		this.order.productIds = ids;
-	}
-
-	validate(): boolean {
-		const errors: typeof this.errors = {};
-
-		if (!this.order.contact.email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-			errors['contact.email'] = 'Некорректный email';
-		}
-
-		if (!this.order.contact.phone) {
-			errors['contact.phone'] = 'Укажите телефон';
-		}
-
-		if (!this.order.address) {
-			errors.address = 'Введите адрес доставки';
-		}
-
-		this.errors = errors;
-		this.events.emit('order:errors', this.errors);
-		return Object.keys(errors).length === 0;
-	}
-
-	getOrder(): OrderData {
-		return this.order;
-	}
-
-	getErrors() {
-		return this.errors;
-	}
+  clear() {
+    this.items = [];
+    this.form = {};
+    this.contacts = {};
+  }
 }
