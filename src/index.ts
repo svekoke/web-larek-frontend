@@ -61,7 +61,7 @@ function showContactsStep() {
 		order.setContacts(data);
 		order.setItems(cart.getItems());
 
-		const orderData = order.getOrderData(); // 👈 сохраняем ДО очистки
+		const orderData = order.getOrderData(); //  сохраняем до очистки
 		console.log('Отправляем заказ:', orderData);
 
 		api
@@ -70,7 +70,7 @@ function showContactsStep() {
 				cart.clear();
 				updateBasketCounter();
 				order.clear();
-				modal.open(renderSuccess(orderData.total)); // 👈 передаём сумму
+				modal.open(renderSuccess(orderData.total)); //  передаём сумму
 			})
 			.catch((err) => console.error('Ошибка заказа:', err));
 	});
