@@ -1,5 +1,5 @@
-import { Api } from '../components/base/api';
-import { Product, ApiListResponse } from '../types/index';
+import { Api } from './api';
+import { Product, ApiListResponse } from '../../types/index';
 
 export class ProductApi extends Api {
 	constructor(baseUrl: string) {
