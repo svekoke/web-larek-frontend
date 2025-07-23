@@ -61,7 +61,11 @@ function showContactsStep() {
 		order.setContacts(data);
 		order.setItems(cart.getItems());
 
+<<<<<<< HEAD
 		const orderData = order.getOrderData(); //  сохраняем ДО очистки
+=======
+		const orderData = order.getOrderData(); //  сохраняем до очистки
+>>>>>>> eb7f745cc64b4b940aba8531aea9f698fb22b0db
 		console.log('Отправляем заказ:', orderData);
 
 		api
