@@ -25,6 +25,7 @@
 - src/components/Page.ts — компонент управления DOM-элементами
 - src/components/base/ — папка с базовым кодом
 - src/components/base/ProductApi.ts — API клиента
+- src/components/base/FormView.ts — форма доставки и оплаты
 
 - src/models/ — модели данных
 - src/models/Cart.ts — логика корзины
@@ -233,6 +234,62 @@ getProductList(): Promise<Product[]>
 
 получает список товаров с сервера.
 
+## FormView
+
+### Назначение:
+
+Абстрактный базовый класс для всех форм (доставка и контакты). Содержит общую логику: валидация, переключение классов, активация кнопки отправки, получение данных из полей и т.д.
+
+### Конструктор:
+
+```
+constructor(formId: string, submitSelector: string = 'button[type="submit"]')
+```
+
+- formId: string — ID шаблона формы (например, order, contacts)
+
+- submitSelector: string — селектор кнопки отправки (по умолчанию button[type="submit"])
+
+### Поля:
+
+```
+protected element: HTMLElement
+```
+
+DOM-элемент формы
+
+```
+protected form: HTMLFormElement
+```
+
+Ссылка на форму
+
+```
+protected submitButton: HTMLButtonElement
+```
+
+Кнопка отправки формы
+
+### Методы:
+
+```
+getElement(): HTMLElement
+```
+
+Возвращает DOM-элемент формы
+
+```
+setSubmitCallback(fn: () => void): void
+```
+
+Устанавливает колбэк на событие отправки формы
+
+```
+setValid(isValid: boolean): void
+```
+
+Включает/выключает кнопку отправки
+
 # Представления
 
 ## Card
@@ -401,7 +458,7 @@ getElement(): HTMLElement
 
 ### Назначение:
 
-Компонент экрана доставки и оплаты — первый шаг оформления заказа.
+Компонент экрана доставки и оплаты — первый шаг оформления заказа. Наследуется от FormView. Добавляет поля, валидацию и логику, специфичную для шага заказа.
 
 ### Конструктор:
 
@@ -410,20 +467,6 @@ constructor(onSubmit: (data: OrderForm) => void)
 ```
 
 - onSubmit — функция, вызываемая при валидной отправке формы.
-
-### Поля:
-
-```
-private element: HTMLElement
-```
-
-DOM-элемент формы.
-
-```
-private onSubmit: (data: OrderForm) => void
-```
-
-колбэк при сабмите формы.
 
 ### Методы:
 
@@ -444,7 +487,7 @@ getElement(): HTMLElement
 
 ### Назначение:
 
-Форма ввода контактных данных (email и телефон). Второй шаг оформления заказа.
+Форма ввода контактных данных (email и телефон). Второй шаг оформления заказа. Наследуется от FormView. Добавляет поля, валидацию и логику, специфичную для шага заказа.
 
 ### Конструктор:
 
@@ -453,20 +496,6 @@ constructor(onSubmit: (data: ContactForm) => void)
 ```
 
 - onSubmit — колбэк, вызываемый при валидной отправке формы.
-
-### Поля:
-
-```
-private element: HTMLElement
-```
-
-DOM-элемент формы.
-
-```
-private onSubmit: (data: ContactForm) => void
-```
-
-функция отправки данных.
 
 ### Методы:
 

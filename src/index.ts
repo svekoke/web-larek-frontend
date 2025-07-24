@@ -46,7 +46,6 @@ function renderBasket() {
 			renderBasket();
 		},
 		() => {
-			order.setItems(cart.getItems()); //  сохраняем выбранные товары перед заказом
 			showOrderStep();
 		}
 	);
@@ -57,11 +56,12 @@ function showContactsStep() {
 	const view = new ContactsView((data) => {
 		order.setContacts(data);
 
-		// фильтр товаров по цене > 0
+		// фильтруем товары по цене > 0
 		const validItems = cart.getItems().filter((item) => item.price > 0);
 		order.setItems(validItems);
 
-		const orderData = order.getOrderData(); //  сохраняем до очистки
+		const orderData = order.getOrderData(); //  то что нужно серверу
+		const total = validItems.reduce((sum, item) => sum + item.price, 0); // отдельно считается сумма
 
 		api
 			.post('/order', orderData)
@@ -69,10 +69,9 @@ function showContactsStep() {
 				cart.clear();
 				updateBasketCounter();
 				order.clear();
-				const successModal = new SuccessModal(orderData.total, () =>
-					modal.close()
-				);
-				modal.open(successModal.getElement()); //  передаём сумму
+
+				const successModal = new SuccessModal(total, () => modal.close());
+				modal.open(successModal.getElement());
 			})
 			.catch((err) => console.error('Ошибка заказа:', err));
 	});
@@ -90,13 +89,19 @@ api
 			});
 
 			const card = new Card(model.getData(), (product) => {
+				//	игнорировать товары без цены
+				if (!product.price) return;
 				const preview = new CardPreview(product, (toAdd) => {
-					cart.add(toAdd);
-					console.log('Товар добавлен в корзину:', cart.getItems());
-
-					updateBasketCounter();
+					const isAlreadyInCart = cart
+						.getItems()
+						.some((item) => item.id === toAdd.id);
+					if (!isAlreadyInCart) {
+						cart.add(toAdd);
+						console.log('Товар добавлен в корзину:', cart.getItems());
+						updateBasketCounter();
+						renderBasket();
+					}
 					modal.close();
-					renderBasket();
 				});
 
 				modal.open(preview.getElement());

@@ -1,37 +1,31 @@
 import { ContactForm } from '../types';
+import { FormView } from './base/FormView';
 
+export class ContactsView extends FormView<ContactForm> {
+	private emailInput: HTMLInputElement;
+	private phoneInput: HTMLInputElement;
 
-export class ContactsView {
-  private element: HTMLElement;
+	constructor(onSubmit: (data: ContactForm) => void) {
+		super('contacts', onSubmit);
 
-  constructor(
-    private onSubmit: (data: { email: string; phone: string }) => void
-  ) {
-    const template = document.getElementById('contacts') as HTMLTemplateElement;
-    this.element = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+		this.emailInput = this.form.querySelector('input[name="email"]')!;
+		this.phoneInput = this.form.querySelector('input[name="phone"]')!;
 
-    const form = this.element as HTMLFormElement;
-    const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement;;
-    const phoneInput = form.querySelector('input[name="phone"]')! as HTMLInputElement;;
-    const submitBtn = form.querySelector('button[type="submit"]')! as HTMLInputElement;;
+		this.form.addEventListener('input', () => this.validate());
+		this.validate();
+	}
 
-    form.addEventListener('input', () => {
-      const valid =
-        emailInput.value.trim().length > 0 &&
-        phoneInput.value.trim().length > 0;
-      submitBtn.toggleAttribute('disabled', !valid);
-    });
+	protected getData(): ContactForm {
+		return {
+			email: this.emailInput.value.trim(),
+			phone: this.phoneInput.value.trim(),
+		};
+	}
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.onSubmit({
-        email: emailInput.value,
-        phone: phoneInput.value,
-      });
-    });
-  }
-
-  getElement() {
-    return this.element;
-  }
+	protected validate() {
+		const valid =
+			this.emailInput.value.trim() !== '' &&
+			this.phoneInput.value.trim() !== '';
+		this.submitButton.disabled = !valid;
+	}
 }

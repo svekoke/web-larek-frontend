@@ -21,9 +21,12 @@ export class Card {
 	private render() {
 		this.element.querySelector('.card__title')!.textContent =
 			this.product.title;
-		this.element.querySelector(
-			'.card__price'
-		)!.textContent = `${this.product.price} синапсов`;
+
+		const priceElement = this.element.querySelector('.card__price')!;
+		priceElement.textContent =
+			this.product.price != null
+				? `${this.product.price} синапсов`
+				: 'Бесценно';
 
 		const categoryEl = this.element.querySelector('.card__category')!;
 		categoryEl.textContent = this.product.category;
@@ -32,9 +35,9 @@ export class Card {
 		const categoryClassMap: Record<string, string> = {
 			'софт-скил': 'soft',
 			'хард-скил': 'hard',
-			'другое': 'other',
+			другое: 'other',
 			дополнительное: 'additional',
-			'кнопка': 'button',
+			кнопка: 'button',
 		};
 
 		const classSuffix = categoryClassMap[this.product.category] || 'other';

@@ -1,63 +1,50 @@
 import { OrderForm } from '../types/index';
+import { FormView } from './base/FormView';
 
-export class OrderView {
-  private element: HTMLElement;
+export class OrderView extends FormView<OrderForm> {
+	private addressInput: HTMLInputElement;
+	private paymentButtons: NodeListOf<HTMLButtonElement>;
+	private errorContainer: HTMLElement;
+	private selectedPayment: string = '';
 
-  constructor(
-    private onSubmit: (data: OrderForm) => void
-  ) {
-    const template = document.getElementById('order') as HTMLTemplateElement;
-    this.element = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+	constructor(onSubmit: (data: OrderForm) => void) {
+		super('order', onSubmit);
 
-    const form = this.element as HTMLFormElement;
-    const submitBtn = form.querySelector('.order__button') as HTMLButtonElement;
-    const addressInput = form.querySelector('input[name="address"]') as HTMLInputElement;
-    const paymentButtons = form.querySelectorAll('button[name]');
-    const errorContainer = form.querySelector('.form__errors') as HTMLSpanElement;
+		this.addressInput = this.form.querySelector('input[name="address"]')!;
+		this.paymentButtons = this.form.querySelectorAll('button[name]');
+		this.errorContainer = this.form.querySelector('.form__errors')!;
 
-    let selectedPayment: string = '';
+		this.form.addEventListener('input', () => this.validate());
 
-    const validate = () => {
-      const address = addressInput.value.trim();
-      const isValid = selectedPayment && address.length > 0;
+		this.paymentButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				this.selectedPayment = button.name;
 
-      if (!address) {
-        errorContainer.textContent = 'Необходимо указать адрес';
-      } else {
-        errorContainer.textContent = '';
-      }
+				this.paymentButtons.forEach(b =>
+					b.classList.remove('button_alt-active')
+				);
+				button.classList.add('button_alt-active');
 
-      submitBtn.disabled = !isValid;
-    };
+				this.validate();
+			});
+		});
 
-    form.addEventListener('input', validate);
+		this.validate();
+	}
 
-    paymentButtons.forEach((btn) => {
-      const button = btn as HTMLButtonElement;
-      button.addEventListener('click', () => {
-        selectedPayment = button.name;
-        paymentButtons.forEach((b) => (b as HTMLElement).classList.remove('button_alt-active'));
-        button.classList.add('button_alt-active');
-        validate();
-      });
-    });
+	protected getData(): OrderForm {
+		return {
+			address: this.addressInput.value.trim(),
+			payment: this.selectedPayment,
+		};
+	}
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const address = addressInput.value.trim();
-      if (!address || !selectedPayment) {
-        validate();
-        return;
-      }
+	protected validate() {
+		const address = this.addressInput.value.trim();
+		const isValid = address !== '' && this.selectedPayment !== '';
 
-      this.onSubmit({
-        address,
-        payment: selectedPayment,
-      });
-    });
-  }
+		this.submitButton.disabled = !isValid;
 
-  getElement() {
-    return this.element;
-  }
+		this.errorContainer.textContent = !address ? 'Необходимо указать адрес' : '';
+	}
 }
